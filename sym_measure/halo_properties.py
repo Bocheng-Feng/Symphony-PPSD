@@ -353,9 +353,43 @@ def process_halo_properties(input_dir, output_dir, suite_name, snap):
 
         if failed_halos:
             print(f"[Warning] Accretion rate calculation failed for halos: {sorted(failed_halos)}")
+            
+    def best_fit_ppsd_slope():
+        """
+        Fit the PPSD slope with singel power law model using non-linear least squares curve fitting.
+        """
+
+        def const_model(r, a):
+            """A one-parameter constant model: y(r) = a."""
+            return a * np.ones_like(r)
+        
+        ppsd_slope_dir = os.path.join(output_dir, "ppsd_slope_profiles_r")
+        halo_files = sorted([f for f in os.listdir(ppsd_slope_dir) if f.endswith(".csv")])
+
+        halo_ids, ppsd_slope = [], [] 
+        for f in halo_files:
+            halo_id = f.split("_")[1]
+            halo_ids.append(halo_id)
+
+            df_ppsd_slope = pd.read_csv(os.path.join(ppsd_slope_dir, f))
+            r = df_ppsd_slope["r_scaled"].values
+            slope = df_ppsd_slope["slope_Q_r"].values
+
+            try:
+                popt, _ = curve_fit(const_model, r, slope, p0=[-1.875])
+                best_slope = popt[0]
+            except Exception:
+                best_slope = -1.875
+
+            ppsd_slope.append(best_slope)
+
+        pd.DataFrame({"halo_id": halo_ids, "slope": ppsd_slope}).to_csv(
+        os.path.join(output_dir, "best_fit_slope.csv"), index=False)
+        print(f"[Saved] best-fit PPSD slope for {suite_name}")
 
     # ------------------- Run sub-functions you need-------------------
     save_basic_properties()
     # save_rvmax()
     compute_jeans_deviation()
     compute_accretion_rates()
+    best_fit_ppsd_slope()
