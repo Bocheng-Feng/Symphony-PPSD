@@ -63,7 +63,7 @@ if __name__ == "__main__":
 ################################ visual map ###################################
             os.makedirs(os.path.join('/home/bocheng/Projects/Symphony-PPSD', 'visualization', f"z_{redshift}"), exist_ok=True)
             for i in range(symlib.n_hosts(suite)):
-                field_map(suite_name=suite, halo_id=i, input_dir=simul_dir, snapshot=snap, grid_res=700, n_neighbors=50, output_dir=f'/home/bocheng/Projects/Symphony-PPSD/visualization/z_{redshift}')
+                field_map(suite_name=suite, halo_id=i, input_dir=simul_dir, snapshot=snap, grid_size=700, n_neighbors=100, output_dir=f'/home/bocheng/Projects/Symphony-PPSD/visualization/z_{redshift}')
 
 ################################ plot ###################################
         # Create directory for saving figures corresponding to the target redshift
