@@ -222,6 +222,13 @@ def smooth_ppsd_slopes(base_dir, suite_name, method='constant_jerk', tvgamma=Non
         Q_tot = df_Q["Q_tot"].values
         Q_r = df_Q["Q_r"].values
 
+        # Mask valid points
+        mask = (Q_r>0) & (Q_tot>0)
+        Q_r = Q_r[mask]
+        Q_tot = Q_tot[mask]
+        r = r[mask]
+        m = m[mask]
+
         # Compute average step sizes in log-space for radius and mass grids
         dt_r = np.diff(np.log10(r)).mean()
         dt_m = np.diff(np.log10(m)).mean()

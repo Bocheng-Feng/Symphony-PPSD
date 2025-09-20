@@ -7,11 +7,12 @@ from scipy.stats import binned_statistic_2d
 from scipy.ndimage import uniform_filter
 from astropy.stats import sigma_clip
 
-def visual(suite_name, halo_id, input_dir, snapshot, grid_res, n_neighbors, output_dir):
+def field_map(suite_name, halo_id, input_dir, snapshot, grid_res, n_neighbors, output_dir):
 
     # --- Create output directory ---
-    os.makedirs(os.path.join(output_dir, 'visualization', f"{suite_name}", f"{halo_id}"), exist_ok=True)
-    save_path = os.path.join(output_dir, 'visualization', f"{suite_name}", f"{halo_id}")
+    index = symlib.get_host_directory(input_dir, suite_name, halo_id)[-3:]
+    os.makedirs(os.path.join(output_dir, f"{suite_name}", f"{index}"), exist_ok=True)
+    save_path = os.path.join(output_dir, f"{suite_name}", f"{index}")
 
     # --- Load particle & simulation parameters ---
     sim_dir = symlib.get_host_directory(input_dir, suite_name, halo_id)
@@ -29,7 +30,7 @@ def visual(suite_name, halo_id, input_dir, snapshot, grid_res, n_neighbors, outp
     r_vir = host["rvir"]           
 
     # --- Convert slice thickness and grid box to physical units ---
-    slice_thickness = 0.3 * r_vir       
+    slice_thickness = 0.5 * r_vir       
     box_size = r_vir                
 
     # --- Positions & velocities in halo-centric frame ---
@@ -111,28 +112,39 @@ def visual(suite_name, halo_id, input_dir, snapshot, grid_res, n_neighbors, outp
 
     # --- Function to plot a 2D field ---
     def plot_field(field, cmap, label, scale):
+        plt.rcParams["text.usetex"] = False
         plt.figure(figsize=(8,7), dpi=500)
-        if scale == 'log':
-            field = np.where(field>0, field, np.nan)
-            field = np.log(field)
-        elif scale == 'linear':
-            field = field
 
-        plt.imshow(field.T, origin='lower',
-                extent=[-box_size, box_size, -box_size, box_size],
-                cmap=cmap, vmin=np.nanpercentile(field, 2),vmax=np.nanpercentile(field, 98))
-        
-        plt.xlabel("X [kpc]")
-        plt.ylabel("Y [kpc]")
-        plt.title(label)
-        plt.colorbar()
+        # Apply log scale if requested
+        if scale == 'log':
+            field = np.where(field > 0, field, np.nan)
+            field = np.log(field)
+
+        plt.imshow(
+            field.T, origin='lower',
+            extent=[-box_size, box_size, -box_size, box_size],
+            cmap=cmap,
+            vmin=np.nanpercentile(field, 2),
+            vmax=np.nanpercentile(field, 98)
+        )
+        # --- Construct halo name string ---
+        index = symlib.get_host_directory(input_dir, suite_name, halo_id)[-3:]
+        halo_name = f"{suite_name} {index}"
+
+        plt.xlabel(r"$X [\mathrm{kpc}]$")
+        plt.ylabel(r"$Y [\mathrm{kpc}]$")
+        plt.title(rf"{halo_name}", fontsize=16)
+
+        # --- Colorbar with unit ---
+        cbar = plt.colorbar()
+        print(f'Visualizing {halo_name}')
         plt.tight_layout()
         plt.savefig(os.path.join(save_path, f"{label}.pdf"))
         plt.close()
 
     # --- Plot density and velocity fields ---
-    plot_field(rho_field, cmap='inferno', label='density', scale='log')
-    plot_field(temp_field, cmap='coolwarm', label='Temperature',scale='linear')
-    plot_field(sigma_r_field, cmap='coolwarm', label='radial_velocity_dispersion',scale='linear')
-    plot_field(Q_r_field, cmap='viridis', label='radial_ppsd', scale='log')
-    plot_field(Q_tot_field, cmap='cividis', label='total_ppsd', scale='log')
+    plot_field(rho_field, cmap='magma', label='Density', scale='log')
+    plot_field(temp_field, cmap='coolwarm', label='Temperature', scale='linear')
+    plot_field(sigma_r_field, cmap='coolwarm', label='Radial Velocity Dispersion',scale='linear')
+    plot_field(Q_r_field, cmap='magma', label='Radial PPSD', scale='log')
+    plot_field(Q_tot_field, cmap='magma', label='Total PPSD', scale='log')

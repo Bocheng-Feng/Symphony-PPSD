@@ -19,16 +19,17 @@ import numpy as np
 import os
 from sym_measure import basic_measure, halo_properties, ppsd_measure
 from sym_plot import basic_plot, ppsd_plot
+from visual import field_map
 
 ########################### user config ################################
 # List of simulation suites to analyze, representing different host halo mass scales
 suite_names = ["SymphonyLMC","SymphonyMilkyWay","SymphonyGroup", "SymphonyLCluster", "SymphonyCluster"]
 
 # Path to the root directory containing Symphony simulation data (particle and halo catalogs)
-simul_dir = '/media/31TB4/bocheng/symphony'
+simul_dir = '/media/31TB4/Bocheng/Symphony'
 
 # Target redshift at which the analysis is performed
-redshifts = [0, 0.01, 0.1 , 0.5, 0.7, 1, 2, 3, 5]
+redshifts = [0, 0.01, 0.1, 0.5, 0.7, 1, 2, 3, 5]
 
 # Radial binning parameters for profile measurements:
 # n_bins = number of radial bins
@@ -59,6 +60,11 @@ if __name__ == "__main__":
             ppsd_measure.smooth_ppsd_slopes(data_dir, suite, method='constant_jerk')
             halo_properties.process_halo_properties(simul_dir, data_dir, suite, snap)
 
+################################ visual map ###################################
+            os.makedirs(os.path.join('/home/bocheng/Projects/Symphony-PPSD', 'visualization', f"z_{redshift}"), exist_ok=True)
+            for i in range(symlib.n_hosts(suite)):
+                field_map(suite_name=suite, halo_id=i, input_dir=simul_dir, snapshot=snap, grid_res=700, n_neighbors=50, output_dir=f'/home/bocheng/Projects/Symphony-PPSD/visualization/z_{redshift}')
+
 ################################ plot ###################################
         # Create directory for saving figures corresponding to the target redshift
         fig_dir = f'/home/bocheng/Projects/Symphony-PPSD/output/z_{redshift}/figure'
@@ -70,4 +76,3 @@ if __name__ == "__main__":
         ppsd_plot.plot_normalized_ppsd(base_dir, suite_names, plot_range=[1e-2,1])
         ppsd_plot.plot_ppsd_slope(base_dir, suite_names, plot_range=[1e-2,1])
         print(f'------z={redshift} completed-------')
-
