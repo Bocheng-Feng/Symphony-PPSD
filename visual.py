@@ -7,13 +7,14 @@ from scipy.spatial import cKDTree
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm, Normalize
 
-def field_map(suite_name, halo_id, input_dir, snapshot, n_neighbors, output_dir, gridsize=500):
+def field_map(suite_name, halo_id, input_dir, snapshot, n_neighbors, output_dir, gridsize=1000):
 
     # --- Create output directory ---
     index = symlib.get_host_directory(input_dir, suite_name, halo_id)[-3:]
     os.makedirs(os.path.join(output_dir, f"{suite_name}", f"{index}"), exist_ok=True)
     save_path = os.path.join(output_dir, f"{suite_name}", f"{index}")
-
+    print(f"Visualizing {suite_name}_{index}")
+    
     # --- Load particle & simulation parameters ---
     sim_dir = symlib.get_host_directory(input_dir, suite_name, halo_id)
     params = symlib.simulation_parameters(suite_name)
@@ -101,7 +102,7 @@ def field_map(suite_name, halo_id, input_dir, snapshot, n_neighbors, output_dir,
         halo_name = f"{suite_name} {index}"
         plt.title(halo_name, fontsize=16)
         plt.tight_layout()
-        plt.savefig(os.path.join(save_path, f"{label}.pdf"))
+        plt.savefig(os.path.join(save_path, f"{label}.png"))
         plt.close()
 
     # --- Plot all fields ---
