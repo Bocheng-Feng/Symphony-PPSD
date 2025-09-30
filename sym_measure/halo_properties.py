@@ -74,7 +74,7 @@ def process_halo_properties(input_dir, output_dir, suite_name, snap):
                 r, _ = symlib.read_rockstar(sim_dir)
                 host = r[0, snap]
 
-                halo_ids.append(f"{halo_idx:03d}")
+                halo_ids.append(f"{halo_idx}")
 
                 # Virial mass in solar masses
                 mvir_list.append(host["m"])
@@ -146,7 +146,7 @@ def process_halo_properties(input_dir, output_dir, suite_name, snap):
                 m = df["m_scaled"].values
                 rvmax = compute_rvmax_from_mass_profile(r, m)
 
-                halo_id = f.split("_")[1]
+                halo_id = int(f.split("_")[1])
                 if halo_id not in df_rvir["halo_id"].values:
                     print(f"[Warning] halo_id {halo_id} not found in virial_radius.csv")
                     continue
@@ -203,7 +203,7 @@ def process_halo_properties(input_dir, output_dir, suite_name, snap):
         failed_halos = []
 
         for f in halo_files:
-            halo_id = f.split("_")[1]
+            halo_id = int(f.split("_")[1])
             try:
                 df_rho = pd.read_csv(os.path.join(density_dir, f))
                 df_vel = pd.read_csv(os.path.join(velocity_dir, f))
@@ -341,7 +341,7 @@ def process_halo_properties(input_dir, output_dir, suite_name, snap):
                     m_past = r[0, snap_past]["m"]
                     # Calculate accretion rate γ
                     gamma = (m_now - m_past) / t_dyn
-                    writer.writerow([f"{i:03d}", gamma])
+                    writer.writerow([i, gamma])
                     saved_count += 1
                     print(f"[Saved] {saved_count}/{n_halos} accretion rates for suite {suite_name}", end='\r', flush=True)
 
@@ -369,7 +369,7 @@ def process_halo_properties(input_dir, output_dir, suite_name, snap):
 
         halo_ids, ppsd_slope = [], [] 
         for f in halo_files:
-            halo_id = f.split("_")[1]
+            halo_id = halo_id = int(f.split("_")[1])
             halo_ids.append(halo_id)
 
             df_ppsd_slope = pd.read_csv(os.path.join(ppsd_slope_dir, f))
@@ -410,7 +410,7 @@ def process_halo_properties(input_dir, output_dir, suite_name, snap):
         results = []
 
         for f in halo_files:
-            halo_id = f.split("_")[1]
+            halo_id = int(f.split("_")[1])
             try:
                 df_rho = pd.read_csv(os.path.join(density_dir, f))
                 df_vel = pd.read_csv(os.path.join(velocity_dir, f))
@@ -443,7 +443,7 @@ def process_halo_properties(input_dir, output_dir, suite_name, snap):
                 else:
                     eta = 2.0 * K_cum[-1] / abs(U_cum[-1])
 
-                results.append({"halo_id": int(halo_id), "eta": eta})
+                results.append({"halo_id": halo_id, "eta": eta})
 
             except Exception as e:
                 print(f"[Warning] Failed to compute η for halo {halo_id}: {e}")
