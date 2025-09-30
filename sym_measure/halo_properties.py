@@ -19,6 +19,7 @@ def process_halo_properties(input_dir, output_dir, suite_name, snap):
     - Computing the radius of maximum circular velocity (r_vmax) from mass profiles.
     - Calculating the Jeans deviation profile and its integrated total as a measure of dynamical equilibrium.
     - Estimating the dynamical mass accretion rates over the last dynamical time.
+    - Computing virial ratio in virial units.
 
     Parameters
     ----------
@@ -451,9 +452,9 @@ def process_halo_properties(input_dir, output_dir, suite_name, snap):
         pd.DataFrame(results).to_csv(output_csv, index=False)
         print(f"[Saved] Virial ratio η for {suite_name}")
         
-    # ------------------- Run sub-functions you need-------------------
+    # ------------------- Run sub-functions you need here-------------------
     save_basic_properties()
-    # save_rvmax()
+    save_rvmax()
     compute_jeans_deviation()
     compute_accretion_rates()
     best_fit_ppsd_slope()
