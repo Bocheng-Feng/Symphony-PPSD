@@ -8,6 +8,7 @@ from astropy.constants import G
 from astropy import units as u
 import symlib
 from colossus.cosmology import cosmology
+from scipy.optimize import curve_fit   
 
 def process_halo_properties(input_dir, output_dir, suite_name, snap):
     """
@@ -386,10 +387,74 @@ def process_halo_properties(input_dir, output_dir, suite_name, snap):
         pd.DataFrame({"halo_id": halo_ids, "slope": ppsd_slope}).to_csv(
         os.path.join(output_dir, "best_fit_slope.csv"), index=False)
         print(f"[Saved] best-fit PPSD slope for {suite_name}")
+        
+    def compute_virial_ratio():
+        """
+        Compute the virial ratio η = 2K/|U| for each halo using the scaled density,
+        mass, and velocity profiles, and save the results as a CSV file.
 
+        η provides a measure of how close a halo is to virial equilibrium.
+
+        Outputs
+        -------
+        output_dir/virial_ratio.csv : CSV file
+            Columns: halo_id, eta
+        """
+        density_dir = os.path.join(output_dir, "density_profiles")
+        velocity_dir = os.path.join(output_dir, "velocity_profiles")
+        mass_dir = os.path.join(output_dir, "mass_profiles")
+        output_csv = os.path.join(output_dir, "virial_ratio.csv")
+        os.makedirs(os.path.dirname(output_csv), exist_ok=True)
+
+        halo_files = sorted([f for f in os.listdir(density_dir) if f.endswith(".csv")])
+        results = []
+
+        for f in halo_files:
+            halo_id = f.split("_")[1]
+            try:
+                df_rho = pd.read_csv(os.path.join(density_dir, f))
+                df_vel = pd.read_csv(os.path.join(velocity_dir, f))
+                df_mass= pd.read_csv(os.path.join(mass_dir, f))
+
+                r = pd.to_numeric(df_rho["r_scaled"], errors='coerce').values
+                rho = pd.to_numeric(df_rho["rho_scaled"], errors='coerce').values
+                m_enc = pd.to_numeric(df_mass["m_scaled"], errors='coerce').values
+                sigma_tot = pd.to_numeric(df_vel["sigma_total_scaled"], errors='coerce').values
+
+                # mask invalid points and r > 0, r <= 1
+                mask = (np.isfinite(r) & np.isfinite(rho) & np.isfinite(m_enc) &
+                        np.isfinite(sigma_tot) & (r > 0) & (r <= 1))
+                r, rho, m_enc, sigma_tot = r[mask], rho[mask], m_enc[mask], sigma_tot[mask]
+
+                if len(r) < 5:
+                    continue
+
+                # compute shell-wise kinetic and potential energies
+                vol_shell = 4.0 * np.pi * r**2
+                K_shell = 0.5 * rho * sigma_tot**2 * vol_shell
+                U_shell = -1 * m_enc * rho / r * vol_shell  # G=1 here
+
+                # cumulative integrals
+                K_cum = np.cumsum(K_shell * np.gradient(r))
+                U_cum = np.cumsum(U_shell * np.gradient(r))
+
+                if K_cum[-1] <= 0 or U_cum[-1] == 0:
+                    eta = np.nan
+                else:
+                    eta = 2.0 * K_cum[-1] / abs(U_cum[-1])
+
+                results.append({"halo_id": int(halo_id), "eta": eta})
+
+            except Exception as e:
+                print(f"[Warning] Failed to compute η for halo {halo_id}: {e}")
+
+        pd.DataFrame(results).to_csv(output_csv, index=False)
+        print(f"[Saved] Virial ratio η for {suite_name}")
+        
     # ------------------- Run sub-functions you need-------------------
     save_basic_properties()
     # save_rvmax()
     compute_jeans_deviation()
     compute_accretion_rates()
     best_fit_ppsd_slope()
+    compute_virial_ratio()
