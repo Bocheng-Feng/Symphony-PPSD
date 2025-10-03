@@ -17,9 +17,11 @@ Author: Bocheng Feng 2025 @Peking Univ.
 import symlib
 import numpy as np
 import os
-from sym_measure import basic_measure, halo_properties, ppsd_measure
-from sym_plot import basic_plot, ppsd_plot
+
+import basic_measure, halo_properties, ppsd_slope
+import density_velocity_plot, ppsd_plot
 from visual import field_map
+from utils import get_snap_from_z
 
 ########################### user config ################################
 # List of simulation suites to analyze, representing different host halo mass scales
@@ -44,22 +46,15 @@ if __name__ == "__main__":
         print(f'------processing z={redshift}-------')
         for suite in suite_names:
             sim_dir = symlib.get_host_directory(simul_dir, suite, 0)  # Get directory for suite host halo 0
-            scale = symlib.scale_factors(sim_dir)                      # Array of scale factors for snapshots
-            z = 1/scale - 1                                            # Convert scale factors to redshifts
-
-            idx = np.argmin(np.abs(z - redshift))    # Find index of snapshot closest to target redshift
-            closest_snapshot = idx                   # Snapshot ID corresponding to closest redshift
-            closest_redshift = z[idx]                # Actual redshift of the chosen snapshot
-            snap = closest_snapshot                  # Rename for clarity in downstream code
-
+            snap, _ = get_snap_from_z(sim_dir, redshift)
             data_dir = f'/home/bocheng/Projects/Symphony-PPSD/output/z_{redshift}/data'  # Directory to save measurement data
             os.makedirs(data_dir, exist_ok=True)    # Create directory if it doesn't exist
 
 ############################### measure #################################
             if if_measure==True:
                 basic_measure.density_velocity_mass(simul_dir, data_dir, suite, snap, n_bins, r_min, r_max)
-                ppsd_measure.ppsd_profiles(data_dir, suite)
-                ppsd_measure.smooth_ppsd_slopes(data_dir, suite, method='constant_jerk')
+                ppsd_slope.ppsd_profiles(data_dir, suite)
+                ppsd_slope.smooth_ppsd_slopes(data_dir, suite, method='constant_jerk')
                 halo_properties.process_halo_properties(simul_dir, data_dir, suite, snap)
 
 ################################ visual map ###################################
@@ -75,8 +70,8 @@ if __name__ == "__main__":
             os.makedirs(fig_dir, exist_ok=True)
 
             base_dir = f'/home/bocheng/Projects/Symphony-PPSD/output/z_{redshift}'
-            basic_plot.plot_density_velocity(base_dir, suite_names)
-            basic_plot.plot_anisotropy(base_dir, suite_names)
+            density_velocity_plot.plot_density_velocity(base_dir, suite_names)
+            density_velocity_plot.plot_anisotropy(base_dir, suite_names)
             ppsd_plot.plot_normalized_ppsd(base_dir, suite_names)
             ppsd_plot.plot_ppsd_slope(base_dir, suite_names)
         print(f'------z={redshift} completed-------')

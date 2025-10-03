@@ -4,14 +4,7 @@ Pseudo Phase Space Density (PPSD) analysis toolkit for cold dark matter (CDM) ho
 
 ## Overview
 
-This repository provides comprehensive tools for measuring, analyzing, and visualizing Pseudo Phase Space Density (PPSD) profiles of host halos from the Symphony simulations. The toolkit focuses on investigating connections between PPSD profiles and halo properties.
-
-## Main Function
-
-- **PPSD Profile**: Calculate smoothed PPSD slopes for host halos
-- **Equilibrium Analysis**: Evaluate deviations from Jeans equation
-- **Visualization**: Visualize the projected PPSD or density map
-
+This repository provides comprehensive tools for investigating Pseudo Phase Space Density (PPSD) profiles of host halos from the Symphony simulations. Our project focuses on investigating connections between PPSD profiles and host halo mass assembly history.
 
 ## Quick Start
 
@@ -22,7 +15,8 @@ python main.py
 ```
 
 This executes:
-1. PPSD profile measurement
-2. Halo property calculation (concentration, accretion rates)
-3. Plot density, velocity and PPSD profiles
-4. Visualize PPSD and mass density map
+1. Measure and save the density profiles, velocity dispersion profiles, velocity anisotropy profiles, PPSD profiles and we also provide the scripts to visualize them.
+2. Compute and save host halo properties: concentration, dynamical accretion rate, deviation from jeans equation, virial ratio and best fit PPSD slope.
+3. Visualize density, temperature and PPSD projected maps.
+
+We also support studying redshift evolution of above-mentioned profiles once one gets the full snapshots of Symphony.

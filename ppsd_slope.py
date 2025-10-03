@@ -221,19 +221,6 @@ def smooth_ppsd_slopes(base_dir, suite_name, method='constant_jerk', tvgamma=Non
         m = df_Q["m_scaled"].values
         Q_tot = df_Q["Q_tot"].values
         Q_r = df_Q["Q_r"].values
-
-        # Mask valid points: positive and finite
-        mask = (Q_r > 0) & (Q_tot > 0) & np.isfinite(Q_r) & np.isfinite(Q_tot) & np.isfinite(r) & np.isfinite(m)
-        Q_r = Q_r[mask]
-        Q_tot = Q_tot[mask]
-        r = r[mask]
-        m = m[mask]
-
-        # Skip halo if too few points
-        if len(r) < 5:
-            print(f"[Halo {halo_idx}] too few valid points, skipping")
-            failed_halos.append(halo_idx)
-            continue
         
         # Compute average step sizes in log-space for radius and mass grids
         dt_r = np.diff(np.log10(r)).mean()

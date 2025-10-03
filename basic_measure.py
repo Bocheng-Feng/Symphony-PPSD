@@ -194,7 +194,7 @@ def density_velocity_mass(input_dir, output_dir, suite_name, snap, n_bins=40, r_
             rho_scaled = (counts * mp / shell_volumes) / rho_m
 
             # Prepare DataFrame for saving
-            df = pd.DataFrame({"halo_idx": halo_idx, "r_scaled": bin_centers, "rho_scaled": rho_scaled})
+            df = pd.DataFrame({"r_scaled": bin_centers, "rho_scaled": rho_scaled})
             count += 1
             save_profile(df, "density_profiles", halo_idx, count, n_halos, failed_density)
         print()  # newline after progress output
@@ -269,7 +269,7 @@ def density_velocity_mass(input_dir, output_dir, suite_name, snap, n_bins=40, r_
 
             # Prepare DataFrame for saving
             df = pd.DataFrame({
-                "halo_idx": halo_idx, "r_scaled": bin_centers,
+                "r_scaled": bin_centers,
                 "sigma_rad_scaled": sigma_rad_scaled,
                 "sigma_tan_scaled": sigma_tan_scaled,
                 "sigma_total_scaled": sigma_total_scaled,
@@ -322,7 +322,7 @@ def density_velocity_mass(input_dir, output_dir, suite_name, snap, n_bins=40, r_
             m_scaled = enclosed_mass / m_vir
 
             # Prepare DataFrame for saving
-            df = pd.DataFrame({"halo_idx": halo_idx, "r_scaled": bin_centers, "m_scaled": m_scaled})
+            df = pd.DataFrame({"r_scaled": bin_centers, "m_scaled": m_scaled})
             count += 1
             save_profile(df, "mass_profiles", halo_idx, count, n_halos, failed_mass)
         print()  # newline after progress output
