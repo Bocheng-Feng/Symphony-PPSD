@@ -20,3 +20,10 @@ This executes:
 3. Visualize density, temperature and PPSD projected maps.
 
 We also support studying redshift evolution of above-mentioned profiles once one gets the full snapshots of Symphony.
+
+## Main finding
+PPSD does not follow a universal self-similar power law, but is instead shaped by halo mass assembly history. Host halos with larger deviations from Jeans equilibrium systematically develop steeper PPSD slopes.
+
+![main_result](./figure/PPSD_visualization.jpg)
+
+See more figures in ```./figure``` directory.
